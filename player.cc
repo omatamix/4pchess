@@ -268,35 +268,41 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   const bool allNode = !(is_pv_node || is_cut_node);
 
   // define the tt node status for former pv nodes
-  bool is_tt_pv = false;
+  // define the tt hit status from the tt data entry
+  bool is_tt_pv = false, tt_hit = false;
 
   std::optional<Move> tt_move;
   const HashTableEntry* tte = nullptr;
-  if (options_.enable_transposition_table) {
+
+  if (options_.enable_transposition_table)
+  {
     int64_t key = board.HashKey();
 
     tte = transposition_table_->Get(key);
-    if (tte != nullptr) {
-      if (tte->key == key) { // valid entry
-        if (tte->depth >= depth) {
+    if (tte != nullptr)
+    {
+      if (tte->key == key)
+      {
+        // valid entry
+        if (tte->depth >= depth)
+        {
           num_cache_hits_++;
-          // at non-PV nodes check for an early TT cutoff
-          if (!is_root_node
-              && !is_pv_node
-              && (tte->bound == EXACT
-                || (tte->bound == LOWER_BOUND && tte->score >= beta)
-                || (tte->bound == UPPER_BOUND && tte->score <= alpha))
-             ) {
 
-            return std::make_tuple(
-                std::min(beta, std::max(alpha, tte->score)), tte->move);
+          // at non pv nodes check for an early TT cutoff
+          if (!is_root_node && !is_pv_node && (tte->bound == EXACT
+             || (tte->bound == LOWER_BOUND && tte->score >= beta)
+             || (tte->bound == UPPER_BOUND && tte->score <= alpha))
+          ) {
+            return std::make_tuple(std::min(beta, std::max(alpha, tte->score)), tte->move);
           }
         }
-        tt_move = tte->move;
+       
+        // update tt vars
+        tt_hit   = true;
+        tt_move  = tte->move;
         is_tt_pv = tte->is_pv;
       }
     }
-
   }
   
   // check to see if the cuurent player to move is in check
