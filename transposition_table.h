@@ -25,25 +25,34 @@ struct HashTableEntry
   bool is_pv;
 };
 
-class TranspositionTable {
- public:
-   TranspositionTable(size_t table_size);
+class TranspositionTable
+{
+public:
+  TranspositionTable(size_t table_size);
 
-   const HashTableEntry* Get(int64_t key);
-   void Save(int64_t key, int depth, std::optional<Move> move,
-             int score, int eval, ScoreBound bound, bool is_pv);
+  const HashTableEntry* Get(int64_t key);
+  void Save(
+    int64_t key,
+    int depth,
+    std::optional<Move> move,
+    int score,
+    int eval,
+    ScoreBound bound,
+    bool is_pv
+  );
 
-  ~TranspositionTable() {
-    if (hash_table_ != nullptr) {
+  ~TranspositionTable()
+  {
+    if (hash_table_ != nullptr)
+    {
       free(hash_table_);
     }
   }
 
- private:
+private:
   HashTableEntry* hash_table_ = nullptr;
-  size_t table_size_ = 0;
+  size_t table_size_          = 0;
 };
-
 
 }  // namespace chess
 
