@@ -317,8 +317,10 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   // save check info to the stack table
   ss->in_check = team_checked;
 
+  // eval improvement vars
   bool improving = false, declining = false;
 
+  // other base vals
   int eval = value_none_tt, do_move_level_pruning = true;;
 
   if (ss->in_check) {
@@ -351,7 +353,8 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   ss->move_count = 0;
 
   // update root depth info
-  if (ply == 1) {
+  if (ply == 1)
+  {
     ss->root_depth = depth;
   }
 
