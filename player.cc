@@ -460,6 +460,10 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
       r++;
       r += depth / 8;
     }
+
+    // increase reduction if this node is cut
+    if (is_cut_node) r++;
+
     r += declining - improving;
 
     r -= in_check;
