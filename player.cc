@@ -347,7 +347,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   }
   
   // reset killers
-  (ss+2)->killers[0] = (ss+2)->killers[1] = Move();
+  (ss + 2)->killers[0] = (ss + 2)->killers[1] = Move();
   
   // reset move count
   ss->move_count = 0;
