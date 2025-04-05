@@ -977,14 +977,16 @@ AlphaBetaPlayer::QSearch(
   }
 
   // check for fail low
-  if (!fail_low) {
+  if (!fail_low)
+  {
     UpdateStats(ss, thread_state, board, *best_move, /*depth=*/0, fail_high, searched_moves);
   }
 
   int score = best_value;
 
   // check for mate
-  if (in_check && best_value == -kMateValue) {
+  if (in_check && best_value == -kMateValue)
+  {
     // checkmate
     score = std::min(beta, std::max(alpha, -kMateValue));
   }
