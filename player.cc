@@ -444,7 +444,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     }
 
     // IID
-    if (depth >= 9 && !tt_move) depth -= 1;
+    if (depth >= 9 && !tt_move) depth -= 1 + is_cut_node;
   }
 
   std::optional<Move> best_move;
