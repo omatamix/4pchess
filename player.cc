@@ -298,6 +298,18 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     }
 
   }
+  
+  // check to see if the cuurent player to move is in check
+  bool in_check = board.IsKingInCheck(player);
+
+  // check to see if the partner of the current player to move is in check
+  bool partner_checked = board.IsKingInCheck(GetPartner(player));
+
+  // overall check to see if the team is in check
+  bool team_checked = in_check || partner_checked;
+
+  // save check info to the stack table
+  ss->in_check = team_checked;
 
   int eval = 0;
 
@@ -321,9 +333,6 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     && (ss-2)->current_move.Present()
     && ss->static_eval + 150 < (ss-2)->static_eval;
 
-  bool in_check = board.IsKingInCheck(player);
-  ss->in_check = in_check;
-
   // reverse futility pruning
   if (options_.enable_futility_pruning
       && !in_check
@@ -334,10 +343,6 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
       && eval < kMateValue) {
     return std::make_tuple(beta, std::nullopt);
   }
-
-  bool partner_checked = board.IsKingInCheck(GetPartner(player));
-
-  bool team_checked = in_check || partner_checked;
 
   // null move pruning
   if (options_.enable_null_move_pruning
