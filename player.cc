@@ -363,6 +363,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   // move level pruning
   if (do_move_level_pruning)
   {
+    // this is per stockfishes way
     improving = ply > 2 && (ss - 2)->static_eval != value_none_tt
                         && (ss - 2)->static_eval < ss->static_eval;
     declining = ply > 1   -(ss - 1)->static_eval < ss->static_eval
@@ -406,13 +407,34 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
         // if it failed high, skip this move
         if (value_and_move_or.has_value()) {
           int nmp_score = -std::get<0>(*value_and_move_or);
-          if (nmp_score >= beta
-            // don't return unproven mate score
-            && nmp_score < kMateValue
-          ) {
-            num_null_moves_pruned_++;
+          
+          // null move verification
+          if (depth >= 10)
+          {
+            auto value_and_move_or_nmv = Search(
+              ss + 1, NonPV, thread_state, ply + 1, depth - r,
+              alpha, beta, maximizing_player, expanded, deadline, null_pvinfo, null_moves + 1
+            );
+            if (value_and_move_or_nmv.has_value()) {
+            int verify_score = std::get<0>(*value_and_move_or_nmv);
+            
+            if (verify_score >= beta)
+            {
+              num_null_moves_pruned_++;
 
-            return std::make_tuple(beta, std::nullopt);
+              return verify_score;
+            }
+          }
+          else
+          {
+            if (nmp_score >= beta
+              // don't return unproven mate score
+              && nmp_score < kMateValue
+            ) {
+              num_null_moves_pruned_++;
+
+              return std::make_tuple(beta, std::nullopt);
+            }
           }
         }
       }
