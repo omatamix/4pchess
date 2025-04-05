@@ -89,6 +89,7 @@ struct Stack {
   // indexed by (piece_type, row, col)
   PieceToHistory* continuation_history = nullptr;
   bool in_check = false;
+  int reduction = 0;
   Move current_move;
   int root_depth = 0;
   int static_eval = 0;
