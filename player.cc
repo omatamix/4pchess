@@ -317,25 +317,52 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   // save check info to the stack table
   ss->in_check = team_checked;
 
-  int eval = 0;
+  bool improving = false, declining = false;
 
-  if (tt_move.has_value()) {
-    eval = tte->score;
-  } else {
-    eval = Evaluate(thread_state, maximizing_player, alpha, beta);
+  int eval = value_none_tt, do_move_level_pruning = true;;
+
+  if (ss->in_check) {
+    // skip early pruning
+    ss->static_eval = eval = (ss - 2)->static_eval;
+    // improving              = false;
+    do_move_level_pruning  = false;
   }
-
+  else if (tt_hit) 
+  {
+    if (tte->eval == value_none_tt)
+    {
+      ss->static_eval = eval = Evaluate(thread_state, maximizing_player, alpha, beta);
+    }
+    else
+    {
+      ss->static_eval = eval = tte->eval;
+    }
+  }
+  else
+  {
+    ss->static_eval = eval = Evaluate(thread_state, maximizing_player, alpha, beta);
+    transposition_table_->Save(board.HashKey(), depth, std::nullopt, 0, eval, EXACT, is_pv_node);
+  }
+  
+  // reset killers
   (ss+2)->killers[0] = (ss+2)->killers[1] = Move();
+  
+  // reset move count
   ss->move_count = 0;
+
+  // update root depth info
   if (ply == 1) {
     ss->root_depth = depth;
   }
-  (ss+1)->root_depth = ss->root_depth;
-  ss->static_eval = eval;
-  bool improving = ply > 2
-    && (ss-2)->current_move.Present()
-    && (ss-2)->static_eval + 150 < ss->static_eval;
-  bool declining = ply > 2
+
+  (ss + 1)->root_depth = ss->root_depth;
+
+  // move level pruning
+  if (do_move_level_pruning)
+  {
+    improving = ply > 2 && (ss - 2)->static_eval != value_none_tt
+                        && (ss - 2)->static_eval < ss->static_eval;
+    declining = ply > 2
     && (ss-2)->current_move.Present()
     && ss->static_eval + 150 < (ss-2)->static_eval;
 
@@ -386,6 +413,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
       }
     }
   }
+}
 
   if (!team_checked && depth >= 9 && !tt_move.has_value()) depth -= 1;
 
