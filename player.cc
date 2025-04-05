@@ -251,7 +251,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     
     // if tt is enabled then save the eval for future searches
     if (options_.enable_transposition_table) {
-      transposition_table_->Save(board.HashKey(), 0, std::nullopt, eval, EXACT, is_pv_node);
+      transposition_table_->Save(board.HashKey(), 0, std::nullopt, 0, eval, EXACT, is_pv_node);
     }
 
     // return the eval
@@ -692,7 +692,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   if (options_.enable_transposition_table) {
     ScoreBound bound = beta <= alpha ? LOWER_BOUND : is_pv_node &&
       best_move.has_value() ? EXACT : UPPER_BOUND;
-    transposition_table_->Save(board.HashKey(), depth, best_move, score, bound, is_pv_node);
+    transposition_table_->Save(board.HashKey(), depth, best_move, score, eval, bound, is_pv_node);
   }
 
   if (best_move.has_value()
@@ -763,36 +763,55 @@ AlphaBetaPlayer::QSearch(
 
   }
 
+  // get the current player to move
   Player player = board.GetTurn();
 
-  bool in_check = board.IsKingInCheck(player);
+  // is the current player to move in check
+  const bool in_check = board.IsKingInCheck(player);
+
+  // is the partner of the current player to move in check
+  const bool partner_checked = board.IsKingInCheck(GetPartner(player));
+  
+  // overall is the team in check
+  const bool team_checked = in_check || partner_checked;
+  
+  // update the stack info
   ss->in_check = in_check;
-  //bool partner_checked = board.IsKingInCheck(GetPartner(player));
 
   // initialize score
-  int best_value = -kMateValue;
+  int eval          =  value_none_tt;
+  int best_value    = -kMateValue;
   int futility_base = -kMateValue;
+
+  // check detection
   if (in_check) {
+    // skip early pruning
     best_value = -kMateValue;
+
   } else {
-    // stand pat
+    // standing pat
     if (tt_move.has_value()) {
-      best_value = tte->score;
+      best_value = eval = tte->score;
     } else {
-      best_value = Evaluate(thread_state, maximizing_player, alpha, beta);
+      best_value = eval = Evaluate(thread_state, maximizing_player, alpha, beta);
     }
+
     if (best_value >= beta) {
-      if (options_.enable_transposition_table) {
-        transposition_table_->Save(
-            board.HashKey(), 0, std::nullopt, best_value, LOWER_BOUND, is_pv_node);
+      if (options_.enable_transposition_table)
+      {
+        transposition_table_->Save(board.HashKey(), 0, std::nullopt, 0, best_value, LOWER_BOUND, is_pv_node);
       }
 
       return std::make_tuple(best_value, std::nullopt);
     }
+
     // delta pruning
-    if (best_value + kPieceEvaluations[QUEEN] < alpha) {
+    if (best_value + kPieceEvaluations[QUEEN] < alpha)
+    {
       return std::make_tuple(alpha, std::nullopt);
     }
+
+    // futility base
     futility_base = best_value;
   }
 
@@ -957,24 +976,30 @@ AlphaBetaPlayer::QSearch(
     }
   }
 
+  // check for fail low
   if (!fail_low) {
-    UpdateStats(ss, thread_state, board, *best_move, /*depth=*/0, fail_high,
-                searched_moves);
+    UpdateStats(ss, thread_state, board, *best_move, /*depth=*/0, fail_high, searched_moves);
   }
 
   int score = best_value;
+
+  // check for mate
   if (in_check && best_value == -kMateValue) {
     // checkmate
     score = std::min(beta, std::max(alpha, -kMateValue));
   }
 
-  if (options_.enable_transposition_table) {
+  // update tt table
+  if (options_.enable_transposition_table)
+  {
     ScoreBound bound = beta <= alpha ? LOWER_BOUND : UPPER_BOUND;
-    transposition_table_->Save(board.HashKey(), tt_depth, best_move, score,
-        bound, is_pv_node);
+    transposition_table_->Save(board.HashKey(), tt_depth, best_move, score, eval, bound, is_pv_node);
   }
 
+  // relax the thread handler
   thread_state.ReleaseMoveBufferPartition();
+
+  // return the best score
   return std::make_tuple(score, best_move);
 }
 
