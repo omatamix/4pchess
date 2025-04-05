@@ -569,7 +569,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
 
     } else if (!is_pv_node || move_count > 1) {
 
-      if (!tt_move.has_value() && is_cut_node) {
+      if (!tt_move.has_value()) {
         r += 2;
       }
 
