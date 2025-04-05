@@ -419,7 +419,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     }
 
     // IID
-    if (depth >= 9 && !tt_move.has_value()) depth -= 1;
+    if (depth >= 9 && !tt_move) depth -= 1;
   }
 
   std::optional<Move> best_move;
@@ -521,8 +521,6 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
       // gradually increase reduction the higher in depth we go
       r += depth / 8;
     }
-
-    // increase reduction for king moves that evade check (WILL BE ADDED SOON)
 
     // decrease reduction for killer moves
     r -= is_killer;
