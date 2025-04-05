@@ -305,6 +305,12 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     }
   }
   
+  // get the prior reduction
+  int prior_reduction = (ss - 1)->reduction;
+  
+  // reset the prior reduction
+  (ss - 1)->reduction = 0;
+
   // check to see if the cuurent player to move is in check
   bool in_check = board.IsKingInCheck(player);
 
