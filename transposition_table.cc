@@ -25,7 +25,7 @@ const HashTableEntry* TranspositionTable::Get(int64_t key) {
 }
 
 void TranspositionTable::Save(
-    int64_t key, int depth, std::optional<Move> move, int score,
+    int64_t key, int depth, std::optional<Move> move, int score, int eval,
     ScoreBound bound, bool is_pv) {
   size_t n = key % table_size_;
   HashTableEntry& entry = hash_table_[n];
@@ -36,6 +36,7 @@ void TranspositionTable::Save(
     entry.depth = depth;
     entry.move = move;
     entry.score = score;
+    entry.eval = eval;
     entry.bound = bound;
     entry.is_pv = is_pv;
   }
