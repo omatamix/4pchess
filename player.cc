@@ -358,6 +358,8 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     }
   }
 
+  if (!in_check && depth >= 9 && !tt_move) depth -= 1;
+
   std::optional<Move> best_move;
   int player_color = static_cast<int>(player.GetColor());
 
