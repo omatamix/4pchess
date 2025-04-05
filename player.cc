@@ -327,14 +327,15 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
 
   bool partner_checked = board.IsKingInCheck(GetPartner(player));
 
+  bool team_checked = in_check || partner_checked;
+
   // null move pruning
   if (options_.enable_null_move_pruning
       && !is_root_node // not root
       && !is_pv_node // not a pv node
       && null_moves == 0 // last move wasn't null
-      && !in_check // not in check
+      && !team_checked // not in check
       && eval >= beta + 50
-      && !partner_checked
       ) {
     num_null_moves_tried_++;
     ss->continuation_history = &thread_state.continuation_history[0][0][NO_PIECE][0][0];
@@ -365,7 +366,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     }
   }
 
-  if (!in_check && depth >= 9 && !tt_move) depth -= 1;
+  if (!team_checked && depth >= 9 && !tt_move) depth -= 1;
 
   std::optional<Move> best_move;
   int player_color = static_cast<int>(player.GetColor());
