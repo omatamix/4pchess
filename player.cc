@@ -405,7 +405,8 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
         board.UndoNullMove();
 
         // if it failed high, skip this move
-        if (value_and_move_or.has_value()) {
+        if (value_and_move_or.has_value())
+        {
           int nmp_score = -std::get<0>(*value_and_move_or);
           
           // null move verification
@@ -415,14 +416,16 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
               ss + 1, NonPV, thread_state, ply + 1, depth - r,
               alpha, beta, maximizing_player, expanded, deadline, null_pvinfo, null_moves + 1
             );
-            if (value_and_move_or_nmv.has_value()) {
-            int verify_score = std::get<0>(*value_and_move_or_nmv);
-            
-            if (verify_score >= beta)
-            {
-              num_null_moves_pruned_++;
 
-              return verify_score;
+            if (value_and_move_or_nmv.has_value()) {
+              int verify_score = std::get<0>(*value_and_move_or_nmv);
+            
+              if (verify_score >= beta)
+              {
+                num_null_moves_pruned_++;
+
+                return verify_score;
+              }
             }
           }
           else
