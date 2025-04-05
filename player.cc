@@ -373,7 +373,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
 
       // reverse futility pruning
       if (options_.enable_futility_pruning
-        && !is_tt_pv && depth <= 1
+        && !is_tt_pv && depth <= 2 - improving
         && eval - 150 * depth >= beta
         && eval < kMateValue
       ) {
