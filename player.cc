@@ -274,6 +274,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     }
 
   }
+
   Player player = board.GetTurn();
 
   if (depth <= 0) {
@@ -291,6 +292,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   }
 
   int eval = 0;
+
   if (tt_move.has_value()) {
     eval = tte->score;
   } else {
@@ -366,7 +368,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     }
   }
 
-  if (!team_checked && depth >= 9 && !tt_move) depth -= 1;
+  if (!team_checked && depth >= 9 && !tt_move.has_value()) depth -= 1;
 
   std::optional<Move> best_move;
   int player_color = static_cast<int>(player.GetColor());
