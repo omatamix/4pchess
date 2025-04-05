@@ -234,10 +234,17 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     return std::nullopt;
   }
   num_nodes_++;
-  bool is_root_node = ply == 1;
 
-  bool is_pv_node = node_type != NonPV;
+  // root node detection
+  constexpr bool is_root_node = ply == 1;
+
+  // pv node detection
+  constexpr bool is_pv_node = node_type != NonPV;
+
   bool is_tt_pv = false;
+
+  // all node detection
+  const bool allNode = !(is_pv_node || is_cut_node);
 
   std::optional<Move> tt_move;
   const HashTableEntry* tte = nullptr;
