@@ -8,7 +8,9 @@
 #include "board.h"
 
 namespace chess {
-  
+
+constexpr int value_none_tt = -119988;
+
 enum ScoreBound
 {
   EXACT = 0, LOWER_BOUND = 1, UPPER_BOUND = 2,
@@ -36,7 +38,7 @@ public:
     int depth,
     std::optional<Move> move,
     int score,
-    int eval,
+    int eval = value_none_tt,
     ScoreBound bound,
     bool is_pv
   );
