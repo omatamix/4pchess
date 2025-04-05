@@ -521,6 +521,9 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
 
     // increase reduction for king moves that evade check (WILL BE ADDED SOON)
 
+    // increase reduction if the static eval is too far from alpha
+    r += std::min(2, std::abs(eval - alpha) / 350);
+
     // decrease reduction if the node is a tt pv node
     r -= is_tt_pv;
 
