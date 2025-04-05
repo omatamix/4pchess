@@ -365,60 +365,62 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   {
     improving = ply > 2 && (ss - 2)->static_eval != value_none_tt
                         && (ss - 2)->static_eval < ss->static_eval;
-    declining = ply > 2
-    && (ss-2)->current_move.Present()
-    && ss->static_eval + 150 < (ss-2)->static_eval;
+    declining = ply > 1   -(ss - 1)->static_eval < ss->static_eval
+                        && (ss - 1)->static_eval != value_none_tt;
 
-  // reverse futility pruning
-  if (options_.enable_futility_pruning
-      && !in_check
-      && !is_pv_node
-      && !is_tt_pv
-      && depth <= 1
-      && eval - 150 * depth >= beta
-      && eval < kMateValue) {
-    return std::make_tuple(beta, std::nullopt);
-  }
+    if (!is_pv_node)
+    {
 
-  // null move pruning
-  if (options_.enable_null_move_pruning
-      && !is_root_node // not root
-      && !is_pv_node // not a pv node
-      && null_moves == 0 // last move wasn't null
-      && !team_checked // not in check
-      && eval >= beta + 50
+      // reverse futility pruning
+      if (options_.enable_futility_pruning
+        && !is_tt_pv && depth <= 1
+        && eval - 150 * depth >= beta
+        && eval < kMateValue
       ) {
-    num_null_moves_tried_++;
-    ss->continuation_history = &thread_state.continuation_history[0][0][NO_PIECE][0][0];
-    ss->current_move = Move();
-    board.MakeNullMove();
-
-    // try the null move with possibly reduced depth
-    PVInfo null_pvinfo;
-    int r = std::min(depth / 3 + 2, depth);
-
-    auto value_and_move_or = Search(
-        ss+1, NonPV, thread_state, ply + 1, depth - r,
-        -beta, -beta + 1, !maximizing_player, expanded, deadline, null_pvinfo,
-        null_moves + 1);
-
-    board.UndoNullMove();
-
-    // if it failed high, skip this move
-    if (value_and_move_or.has_value()) {
-      int nmp_score = -std::get<0>(*value_and_move_or);
-      if (nmp_score >= beta
-          // don't return unproven mate score
-          && nmp_score < kMateValue) {
-        num_null_moves_pruned_++;
-
         return std::make_tuple(beta, std::nullopt);
       }
-    }
-  }
-}
 
-  if (!team_checked && depth >= 9 && !tt_move.has_value()) depth -= 1;
+      // null move pruning
+      if (options_.enable_null_move_pruning
+        && !is_root_node     // not root
+        && null_moves == 0   // last move wasn't null
+        && eval >= beta + 50 // check against beta adjustment
+      ) {
+        num_null_moves_tried_++;
+        ss->continuation_history = &thread_state.continuation_history[0][0][NO_PIECE][0][0];
+        ss->current_move = Move();
+        board.MakeNullMove();
+
+        // try the null move with possibly reduced depth
+        PVInfo null_pvinfo;
+        int r = std::min(depth / 3 + 2, depth);
+
+        auto value_and_move_or = Search(
+          ss+1, NonPV, thread_state, ply + 1, depth - r,
+          -beta, -beta + 1, !maximizing_player, expanded, deadline, null_pvinfo,
+          null_moves + 1
+        );
+
+        board.UndoNullMove();
+
+        // if it failed high, skip this move
+        if (value_and_move_or.has_value()) {
+          int nmp_score = -std::get<0>(*value_and_move_or);
+          if (nmp_score >= beta
+            // don't return unproven mate score
+            && nmp_score < kMateValue
+          ) {
+            num_null_moves_pruned_++;
+
+            return std::make_tuple(beta, std::nullopt);
+          }
+        }
+      }
+    }
+
+    // IID
+    if (depth >= 9 && !tt_move.has_value()) depth -= 1;
+  }
 
   std::optional<Move> best_move;
   int player_color = static_cast<int>(player.GetColor());
