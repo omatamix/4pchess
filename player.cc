@@ -510,20 +510,39 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
 
     int r = 1 + std::max(0,(depth-5)/3) + move_count/30;
 
-    if (quiet) {
+    // increase reduction more if the move is a quiet move
+    if (quiet) 
+    {
       r++;
+      
+      // gradually increase reduction the higher in depth we go
       r += depth / 8;
     }
 
+    // increase reduction for king moves that evade check (WILL BE ADDED SOON)
+
+    // decrease reduction if the node is a tt pv node
+    r -= is_tt_pv;
+
     // increase reduction if this node is cut
-    if (is_cut_node) r++;
+    if (is_cut_node) r += 2;
 
-    r += declining - improving;
+    // decrease reduction if the opponent is worsening
+    // increase reduction if we are not improving
+    r -= declining + !improving;
 
+    // decrease reduction if we are in check
     r -= in_check;
+
+    // decrease reduction if the move delivers check
     r -= delivers_check;
+
+    // decrease reduction if the node is a pv node
     r -= is_pv_node;
+
+    // decrease reduction if the move is a capture mode and has a positive SEE val
     r -= move.IsCapture() && move.ApproxSEE(board, kPieceEvaluations) > 0;
+
     if (!move.IsCapture()) {
       int history_score = thread_state.history_heuristic[piece.GetPieceType()][from.GetRow()][from.GetCol()]
           [to.GetRow()][to.GetCol()];
