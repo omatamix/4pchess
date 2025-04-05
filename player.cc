@@ -233,7 +233,30 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
         && std::chrono::system_clock::now() >= *deadline)) {
     return std::nullopt;
   }
+
+  // increase node count
   num_nodes_++;
+
+  // get next players turn
+  Player player = board.GetTurn();
+
+  // check for depth termination
+  if (depth <= 0) {
+    if (options_.enable_qsearch) {
+      return QSearch(ss, is_pv_node ? PV : NonPV, thread_state, 0, alpha, beta, maximizing_player, deadline, pvinfo);
+    }
+
+    // if qsearch is disabled just return the eval
+    int eval = Evaluate(thread_state, maximizing_player, alpha, beta);
+    
+    // if tt is enabled then save the eval for future searches
+    if (options_.enable_transposition_table) {
+      transposition_table_->Save(board.HashKey(), 0, std::nullopt, eval, EXACT, is_pv_node);
+    }
+
+    // return the eval
+    return std::make_tuple(eval, std::nullopt);
+  }
 
   // root node detection
   constexpr bool is_root_node = ply == 1;
@@ -241,10 +264,11 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   // pv node detection
   constexpr bool is_pv_node = node_type != NonPV;
 
-  bool is_tt_pv = false;
-
   // all node detection
   const bool allNode = !(is_pv_node || is_cut_node);
+
+  // define the tt node status for former pv nodes
+  bool is_tt_pv = false;
 
   std::optional<Move> tt_move;
   const HashTableEntry* tte = nullptr;
@@ -273,22 +297,6 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
       }
     }
 
-  }
-
-  Player player = board.GetTurn();
-
-  if (depth <= 0) {
-    if (options_.enable_qsearch) {
-      return QSearch(ss, is_pv_node ? PV : NonPV, thread_state, 0, alpha, beta,
-          maximizing_player, deadline, pvinfo);
-    }
-
-    int eval = Evaluate(thread_state, maximizing_player, alpha, beta);
-    if (options_.enable_transposition_table) {
-      transposition_table_->Save(board.HashKey(), 0, std::nullopt, eval, EXACT, is_pv_node);
-    }
-
-    return std::make_tuple(eval, std::nullopt);
   }
 
   int eval = 0;
