@@ -508,6 +508,9 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
       continue;
     }
 
+    // is this a killer move
+    const int is_killer = ss->killers[0] == move || ss->killers[1] == move;
+
     int r = 1 + std::max(0,(depth-5)/3) + move_count/30;
 
     // increase reduction more if the move is a quiet move
@@ -520,6 +523,9 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     }
 
     // increase reduction for king moves that evade check (WILL BE ADDED SOON)
+
+    // decrease reduction for killer moves
+    r -= is_killer;
 
     // increase reduction if the static eval is too far from alpha
     r += std::min(2, std::abs(eval - alpha) / 350);
