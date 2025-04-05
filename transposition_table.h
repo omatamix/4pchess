@@ -38,7 +38,7 @@ public:
     int depth,
     std::optional<Move> move,
     int score,
-    int eval = value_none_tt,
+    int eval,
     ScoreBound bound,
     bool is_pv
   );
