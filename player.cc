@@ -238,10 +238,10 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   num_nodes_++;
 
   // root node detection
-  constexpr bool is_root_node = ply == 1;
+  const bool is_root_node = ply == 1;
 
   // pv node detection
-  constexpr bool is_pv_node = node_type != NonPV;
+  const bool is_pv_node = node_type != NonPV;
 
   // all node detection
   const bool allNode = !(is_pv_node || is_cut_node);
