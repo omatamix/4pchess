@@ -568,9 +568,8 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     // increase reduction if this node is cut
     if (is_cut_node) r += 2;
 
-    // decrease reduction if the opponent is worsening
     // increase reduction if we are not improving
-    r -= declining - !improving;
+    r += !improving;
 
     // decrease reduction if we are in check
     r -= in_check;
