@@ -376,7 +376,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
                         &&  (ss - 1)->static_eval != value_none_tt;
 
     if (prior_reduction >= 3 && !declining) depth++;
-    if (prior_reduction >= 1 && depth >= 2 && ss->static_eval + (ss - 1)->stati_eval > 250) depth--;
+    if (prior_reduction >= 1 && depth >= 2 && ss->static_eval + (ss - 1)->static_eval > 250) depth--;
 
     if (!is_pv_node)
     {
