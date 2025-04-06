@@ -237,6 +237,15 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   // increase node count
   num_nodes_++;
 
+  // root node detection
+  constexpr bool is_root_node = ply == 1;
+
+  // pv node detection
+  constexpr bool is_pv_node = node_type != NonPV;
+
+  // all node detection
+  const bool allNode = !(is_pv_node || is_cut_node);
+
   // get next players turn
   Player player = board.GetTurn();
 
@@ -257,15 +266,6 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
     // return the eval
     return std::make_tuple(eval, std::nullopt);
   }
-
-  // root node detection
-  constexpr bool is_root_node = ply == 1;
-
-  // pv node detection
-  constexpr bool is_pv_node = node_type != NonPV;
-
-  // all node detection
-  const bool allNode = !(is_pv_node || is_cut_node);
 
   // define the tt node status for former pv nodes
   // define the tt hit status from the tt data entry
