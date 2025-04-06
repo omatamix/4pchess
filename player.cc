@@ -420,7 +420,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
           
           // null move verification
           if (depth >= 256)
-          // {
+          {
           //   auto value_and_move_or_nmv = Search(
           //     ss + 1, NonPV, thread_state, ply + 1, depth - r,
           //     alpha, beta, maximizing_player, expanded, deadline, null_pvinfo, null_moves + 1
