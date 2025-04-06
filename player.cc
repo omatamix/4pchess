@@ -678,7 +678,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
 
       r = std::clamp(r, 0, depth - 1);
 
-      ss->reduction = depth - 1 + e;
+      ss->reduction = depth - 1 + e - r;
 
       value_and_move_or = Search(
         ss+1, NonPV, thread_state, ply + 1, depth - 1 - r + e,
