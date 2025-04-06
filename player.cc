@@ -887,8 +887,8 @@ AlphaBetaPlayer::QSearch(
 
   } else {
     // standing pat
-    if (tt_move.has_value()) {
-      best_value = eval = tte->score;
+    if (tt_move.has_value() && tte->eval != value_none_tt) {
+      best_value = eval = tte->eval;
     } else {
       best_value = eval = Evaluate(thread_state, maximizing_player, alpha, beta);
     }
