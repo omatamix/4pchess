@@ -430,7 +430,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
               {
                 num_null_moves_pruned_++;
 
-                return verify_score;
+                return std::make_tuple(verify_score, std::nullopt);
               }
             }
           }
