@@ -665,7 +665,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
 
     // check extensions
     if (options_.enable_check_extensions
-      && (in_check || (delivers_check && move_count < 6 && expanded < 4)) {
+      && (in_check || (delivers_check && move_count < 6 && expanded < 4))) {
       num_check_extensions_++;
       e = 1;
     }
