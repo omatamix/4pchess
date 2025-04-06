@@ -327,7 +327,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   bool improving = false, declining = false;
 
   // other base vals
-  int eval = value_none_tt, do_move_level_pruning = true;;
+  int eval = value_none_tt, do_move_level_pruning = true;
 
   if (ss->in_check) {
     // skip early pruning
