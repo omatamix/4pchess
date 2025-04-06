@@ -567,7 +567,7 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
 
     // decrease reduction if the opponent is worsening
     // increase reduction if we are not improving
-    r -= declining + !improving;
+    r -= declining - !improving;
 
     // decrease reduction if we are in check
     r -= in_check;
