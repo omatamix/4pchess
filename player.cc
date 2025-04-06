@@ -370,10 +370,10 @@ std::optional<std::tuple<int, std::optional<Move>>> AlphaBetaPlayer::Search(
   if (do_move_level_pruning)
   {
     // this is per stockfishes way
-    improving = ply > 2 && (ss - 2)->static_eval != value_none_tt
-                        && (ss - 2)->static_eval < ss->static_eval;
-    declining = ply > 1   -(ss - 1)->static_eval < ss->static_eval
-                        && (ss - 1)->static_eval != value_none_tt;
+    improving = ply > 2 &&  (ss - 2)->static_eval != value_none_tt
+                        &&  (ss - 2)->static_eval < ss->static_eval;
+    declining = ply > 1 && -(ss - 1)->static_eval < ss->static_eval
+                        &&  (ss - 1)->static_eval != value_none_tt;
 
     if (!is_pv_node)
     {
